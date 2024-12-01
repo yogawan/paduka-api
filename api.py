@@ -16,7 +16,7 @@ def get_db_connection():
     )
     return connection
 
-# Get by NIK
+# GET/NIK
 @app.route('/api/ktp/<nik>', methods=['GET'])
 def get_ktp(nik):
     connection = None
@@ -65,17 +65,14 @@ def get_all_ktp():
 def add_ktp():
     data = request.get_json()
 
-    # Cek apakah semua field diperlukan ada
     required_fields = ['Nik', 'Nama_Lengkap', 'Gol_Darah', 'Tempat_Lahir', 'Tanggal_Lahir', 'Jenis_Kelamin', 'Agama', 'Status_Kawin', 'Pekerjaan', 'Alamat', 'Kewarganegaraan']
     if not all(field in data for field in required_fields):
         return jsonify({'message': 'Semua field diperlukan'}), 400
 
-    # Cek format tanggal (jika diperlukan)
     try:
         Tanggal_Lahir = data['Tanggal_Lahir']
-        # Validasi tanggal jika perlu
         from datetime import datetime
-        datetime.strptime(Tanggal_Lahir, "%Y-%m-%d")  # Pastikan format YYYY-MM-DD
+        datetime.strptime(Tanggal_Lahir, "%Y-%m-%d")
     except ValueError:
         return jsonify({'message': 'Format tanggal tidak valid, harus YYYY-MM-DD'}), 400
 
@@ -110,8 +107,6 @@ def add_ktp():
     finally:
         if connection:
             connection.close()
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)
