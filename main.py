@@ -1,54 +1,39 @@
-import mysql.connector
-
-def connect_to_server():
-    return mysql.connector.connect(
-        host='localhost',
-        user='root',
-        password='pw'
-    )
+import sqlite3
 
 def connect_to_db():
-    return mysql.connector.connect(
-        host='localhost',
-        user='yogaone',
-        password='fullsnack',
-        database='db_ktp'
-    )
-
-def create_database():
-    db = connect_to_server()
-    myCursor = db.cursor()
-    myCursor.execute("CREATE DATABASE IF NOT EXISTS db_ktp")
-    print("Database 'db_ktp' telah dibuat.")
-    myCursor.close()
-    db.close()
+    return sqlite3.connect("db_ktp.sqlite")
 
 def create_table():
     db = connect_to_db()
-    myCursor = db.cursor()
+    cursor = db.cursor()
     create_table_query = """
     CREATE TABLE IF NOT EXISTS tb_ktp (
-        Nik VARCHAR(16) PRIMARY KEY,
-        Nama_Lengkap VARCHAR(50),
-        Gol_Darah VARCHAR(2),
-        Tempat_Lahir VARCHAR(50),
-        Tanggal_Lahir DATE,
-        Jenis_Kelamin ENUM('L', 'P'),
-        Agama VARCHAR(20),
-        Status_Kawin VARCHAR(20),
-        Pekerjaan VARCHAR(50),
-        Alamat TEXT,
-        Kewarganegaraan VARCHAR(3)
+        Nik TEXT PRIMARY KEY,
+        Nama_Lengkap TEXT,
+        Gol_Darah TEXT,
+        Tempat_Lahir TEXT,
+        Tanggal_Lahir TEXT,
+        Jenis_Kelamin TEXT,
+        Agama TEXT,
+        Status_Kawin TEXT,
+        Pekerjaan TEXT,
+        Provinsi TEXT,
+        Kabupaten TEXT,
+        Kecamatan TEXT,
+        Kelurahan TEXT,
+        Dusun TEXT,
+        Kewarganegaraan TEXT
     );
     """
-    myCursor.execute(create_table_query)
+    cursor.execute(create_table_query)
+    db.commit()
     print("Tabel 'tb_ktp' telah dibuat.")
-    myCursor.close()
+    cursor.close()
     db.close()
 
 def inputPenduduk():
     db = connect_to_db()
-    myCursor = db.cursor()
+    cursor = db.cursor()
     try:
         Nik = input("Masukan NIK Anda (16 digit): ")
         Nama_Lengkap = input("Masukan Nama Anda: ")
@@ -65,26 +50,29 @@ def inputPenduduk():
         Agama = input("Masukan Agama Anda: ")
         Status_Kawin = input("Masukan Status Kawin Anda: ")
         Pekerjaan = input("Masukan Pekerjaan Anda: ")
-        Alamat = input("Masukan Alamat Anda: ")
+        Provinsi = input("Masukan Provinsi Anda: ")
+        Kabupaten = input("Masukan Kabupaten Anda: ")
+        Kecamatan = input("Masukan Kecamatan Anda: ")
+        Kelurahan = input("Masukan Kelurahan Anda: ")
+        Dusun = input("Masukan Dusun Anda: ")
         Kewarganegaraan = input("Masukan Kewarganegaraan Anda (WNI/WNA): ").upper()
         if Kewarganegaraan not in ['WNI', 'WNA']:
             print("Kewarganegaraan hanya boleh WNI atau WNA.")
             return
-        
-        tamp = (Nik, Nama_Lengkap, Gol_Darah, Tempat_Lahir, Tanggal_Lahir, Jenis_Kelamin, Agama, Status_Kawin, Pekerjaan, Alamat, Kewarganegaraan)
-        sql = """INSERT INTO tb_ktp (Nik, Nama_Lengkap, Gol_Darah, Tempat_Lahir, Tanggal_Lahir, Jenis_Kelamin, Agama, Status_Kawin, Pekerjaan, Alamat, Kewarganegaraan)
-                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
-        myCursor.execute(sql, tamp)
+
+        tamp = (Nik, Nama_Lengkap, Gol_Darah, Tempat_Lahir, Tanggal_Lahir, Jenis_Kelamin, Agama, Status_Kawin, Pekerjaan, Provinsi, Kabupaten, Kecamatan, Kelurahan, Dusun, Kewarganegaraan)
+        sql = """INSERT INTO tb_ktp (Nik, Nama_Lengkap, Gol_Darah, Tempat_Lahir, Tanggal_Lahir, Jenis_Kelamin, Agama, Status_Kawin, Pekerjaan, Provinsi, Kabupaten, Kecamatan, Kelurahan, Dusun, Kewarganegaraan)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
+        cursor.execute(sql, tamp)
         db.commit()
         print("Data berhasil disimpan.")
     except Exception as e:
         print(f"Terjadi kesalahan: {e}")
     finally:
-        myCursor.close()
+        cursor.close()
         db.close()
 
 def main():
-    create_database()
     create_table()
     while True:
         print("\nPilih Menu:")
