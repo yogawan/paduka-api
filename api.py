@@ -144,6 +144,44 @@ def add_penduduk():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# Review
+@app.route('/api/userdata/<int:id>', methods=['PUT'])
+def update_user_data(id):
+    try:
+        data = request.get_json()  # Ambil data dari request
+        print(f"Data received for update: {data}")  # Log data yang diterima
+        
+        if not data:
+            return jsonify({"error": "No data provided for update."}), 400
+
+        # Ambil koneksi database
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Buat query update secara dinamis berdasarkan field yang dikirimkan
+        fields_to_update = []
+        values = []
+
+        for key, value in data.items():
+            fields_to_update.append(f"{key} = ?")
+            values.append(value)
+
+        if not fields_to_update:
+            return jsonify({"error": "No valid fields to update."}), 400
+
+        # Tambahkan ID untuk WHERE clause
+        values.append(id)
+
+        # Query update
+        query = f"UPDATE user_data SET {', '.join(fields_to_update)} WHERE id = ?"
+        cursor.execute(query, values)
+        conn.commit()
+        conn.close()
+
+        return jsonify({"message": "User data updated successfully."}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 
 # User Side
